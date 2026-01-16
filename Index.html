@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Suivi d'avancement des statuts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            padding: 40px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        .status-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .status-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .status-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .status-value {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .status-1 { border-top: 5px solid #f39c12; }
+        .status-2 { border-top: 5px solid #3498db; }
+        .status-3 { border-top: 5px solid #2ecc71; }
+        .status-4 { border-top: 5px solid #e74c3c; }
+
+        .last-update {
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📊 Suivi d'avancement des statuts</h1>
+
+<div class="status-container">
+    <div class="status-card status-1">
+        <div class="status-title">🕒 A traiter</div>
+        <div class="status-value" id="status-1">-</div>
+    </div>
+
+    <div class="status-card status-2">
+        <div class="status-title">⚙️ En cours</div>
+        <div class="status-value" id="status-2">-</div>
+    </div>
+
+    <div class="status-card status-3">
+        <div class="status-title">✅ OK</div>
+        <div class="status-value" id="status-3">-</div>
+    </div>
+
+    <div class="status-card status-4">
+        <div class="status-title">❌ KO</div>
+        <div class="status-value" id="status-4">-</div>
+    </div>
+</div>
+
+<div class="last-update" id="last-update"></div>
+
+<script>
+    const baseUrl = "https://app-conn-brevozelty-cotesushi-staging.azurewebsites.net/api/Stats";
+    const apiKey = "De87ynk9eocsBxuRWhXoNRcOOzoVSs";
+
+    async function fetchStatus(status) {
+        const url = `${baseUrl}?key=${apiKey}&status=${status}&top&id=&brandId=&url&message=&zeltyContactId=&brevoId`;
+
+        try {
+            const response = await fetch(url);
+            return await response.text(); // entier brut
+        } catch (error) {
+            console.error("Erreur API status", status, error);
+            return "Erreur";
+        }
+    }
+
+    async function refreshStats() {
+        for (let status = 1; status <= 4; status++) {
+            const value = await fetchStatus(status);
+            document.getElementById(`status-${status}`).innerText = value;
+        }
+
+        document.getElementById("last-update").innerText =
+            "Dernière mise à jour : " + new Date().toLocaleTimeString();
+    }
+
+    // Chargement initial
+    refreshStats();
+
+    // Rafraîchissement toutes les 10 secondes
+    setInterval(refreshStats, 10000);
+</script>
+
+</body>
+</html>
